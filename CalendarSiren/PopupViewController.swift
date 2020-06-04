@@ -57,7 +57,7 @@ class PopupViewController: NSViewController {
     }
     
     @objc func closePopup(_ sender: Any?) {
-        (NSApp.delegate as! AppDelegate).popover.performClose(sender)
+        (NSApp.delegate as! AppDelegate).closePopover(sender: sender)
     }
 
     @objc func refresh(_ sender: Any?) {

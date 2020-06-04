@@ -127,7 +127,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if (audioPlayer != nil) {
             audioPlayer?.stop();
         }
-        print("restored volume: \(macvolume_cmd(set: 1, vol: savedVolume))")
+        if (macvolume_cmd(set:0, vol:100) != savedVolume) {
+            print("restored volume: \(macvolume_cmd(set: 1, vol: savedVolume))")
+            loadFirstEvent()
+        }
     }
     
     @objc func dailyRun(_ timer: Timer ) {
@@ -135,12 +138,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func loadFirstEvent() {
+        print("loading calendars")
         let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
         
         let formatter2 = DateFormatter()
         formatter2.timeStyle = .medium
         
-        let startDate = Date();
+        var startDate = Date();
+        if (firstEventDate != nil) {
+            startDate =  Calendar.current.date(byAdding: .minute, value: 10, to: firstEventDate!)!
+        }
         let startDateComponents = Calendar.current.dateComponents(
             [ .timeZone,
               .year, .month, .day,
@@ -168,7 +175,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 
                 // iterate through events
                 for event in matchingEvents {
-                    if (!event.isAllDay) {
+                    if (!event.isAllDay && event.startDate > startDate) {
                         var notes = "";
                         if (event.notes != nil) {
                             notes = event.notes!
@@ -195,6 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             print("First event: \(formatter2.string(from: firstEvent!.startDate)) \(firstEvent!.title!)")
             print("Timer: \(formatter2.string(from: firstEventDate!))")
+            (popover.contentViewController as! PopupViewController).label!.stringValue = "\(formatter2.string(from: firstEvent!.startDate)) \(firstEvent!.title!)"
             //let fireDate = Date().addingTimeInterval(5);
             nextEventTimer = Timer(fireAt: firstEventDate!, interval: 0, target: self, selector: #selector(fireEvent), userInfo: firstEvent, repeats: false)
             RunLoop.main.add(nextEventTimer!, forMode: .common)
