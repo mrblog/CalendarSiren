@@ -45,6 +45,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         constructMenu()
 
+        NotificationCenter.default.addObserver(self, selector: #selector(storeChanged(notification:)), name: .EKEventStoreChanged, object: EventStore.sharedInstance.eventStore)
+
         if (selectedCalendar != nil) {
             loadFirstEvent()
         }
@@ -205,6 +207,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if (firstEventDate == nil) {
             print("No events upcoming")
+            (popover.contentViewController as! PopupViewController).label!.stringValue = "No events upcoming"
         } else {
             print("First event: \(formatter2.string(from: firstEvent!.startDate)) \(firstEvent!.title!)")
             print("Timer: \(formatter2.string(from: firstEventDate!))")
@@ -286,6 +289,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func selectCalendar(title : String) {
         selectedCalendar = title;
         UserDefaults.standard.set(selectedCalendar, forKey: kSelectedCalendarKey)
+        loadFirstEvent()
+    }
+    
+    @objc private func storeChanged(notification: NSNotification) {
+        debugPrint("storeChanged \(notification)")
         loadFirstEvent()
     }
 }
