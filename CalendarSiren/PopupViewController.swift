@@ -68,6 +68,7 @@ class PopupViewController: NSViewController {
     override func viewWillAppear() {
         super.viewWillAppear()
         let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+        calendarPopup!.removeAllItems()
         for calendar in calendars {
             calendarPopup?.addItem(withTitle: calendar.title)
         }
