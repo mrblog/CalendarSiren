@@ -13,6 +13,8 @@ class PopupViewController: NSViewController {
     var closeButton : NSButton?
     var refreshButton : NSButton?
     var label : NSTextField?
+    var calendarPopup : NSPopUpButton?
+    var calendarLabel : NSTextField?
     
     override func loadView() {
         self.view = NSView()
@@ -32,7 +34,7 @@ class PopupViewController: NSViewController {
         
         label = NSTextField()
         label!.frame = NSRect(origin: .zero, size: NSSize(width: 200, height: 44))
-        label!.stringValue = "My awesome label"
+        label!.stringValue = "(None))"
         label!.backgroundColor = .clear
         label!.isBezeled = false
         label!.isEditable = false
@@ -46,6 +48,28 @@ class PopupViewController: NSViewController {
         refreshButton!.target = self
         refreshButton!.action = #selector(refresh(_:))
         self.view.addSubview( refreshButton! )
+        
+        calendarPopup = NSPopUpButton()
+        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+        for calendar in calendars {
+            calendarPopup?.addItem(withTitle: calendar.title)
+        }
+        if ((NSApp.delegate as! AppDelegate).selectedCalendar != nil) {
+            calendarPopup?.selectItem(withTitle: (NSApp.delegate as! AppDelegate).selectedCalendar!)
+        }
+        calendarPopup!.target = self;
+        calendarPopup!.action = #selector(calendarChanged(_:))
+        self.view.addSubview( calendarPopup! )
+
+        calendarLabel = NSTextField()
+        calendarLabel!.frame = NSRect(origin: .zero, size: NSSize(width: 200, height: 44))
+        calendarLabel!.stringValue = "Calendar:"
+        calendarLabel!.backgroundColor = .clear
+        calendarLabel!.isBezeled = false
+        calendarLabel!.isEditable = false
+        calendarLabel!.alignment = .center
+        calendarLabel!.sizeToFit()
+        self.view.addSubview( calendarLabel! )
     }
     
     override func viewWillAppear() {
@@ -53,6 +77,8 @@ class PopupViewController: NSViewController {
         closeButton!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-50, y: 60, width: 100, height: 30)
         label!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-100, y: 200, width: 200, height: 44)
         refreshButton!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-50, y: 140, width: 100, height: 30)
+        calendarPopup!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-40, y: 280, width: 150, height: 44)
+        calendarLabel!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-140, y: 267, width: 100, height: 44)
 
     }
     
@@ -62,5 +88,11 @@ class PopupViewController: NSViewController {
 
     @objc func refresh(_ sender: Any?) {
         (NSApp.delegate as! AppDelegate).loadFirstEvent()
+    }
+    
+    @objc func calendarChanged(_ sender: Any?) {
+        let menuItem = (sender as! NSPopUpButton).selectedItem
+        print("calendarChanged: \(menuItem!.title)")
+        (NSApp.delegate as! AppDelegate).selectCalendar(title: menuItem!.title)
     }
 }

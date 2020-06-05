@@ -22,7 +22,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var dailyTimer : Timer?
     var firstEventDate : Date?
     var firstEvent : EKEvent?
-
+    var selectedCalendar : String?
+    let kSelectedCalendarKey = "selectedCalendar"
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarButtonImage"))
@@ -37,11 +39,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         savedVolume = macvolume_cmd(set:0, vol:100)
         print("saved volume: \(savedVolume)")
         
+        selectedCalendar = UserDefaults.standard.object(forKey:kSelectedCalendarKey) as? String
+        
         constructMenu()
 
         EventStore.sharedInstance.requestAccess()
         
-        loadFirstEvent()
+        if (selectedCalendar != nil) {
+            loadFirstEvent()
+        }
         
         /*
         let sources = EventStore.sharedInstance.eventStore.sources
@@ -66,7 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem(title: "Settings", action: #selector(AppDelegate.togglePopover(_:)), keyEquivalent: "S"))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Quotes", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit Siren", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         
         statusItem.menu = menu
     }
@@ -168,7 +174,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         for calendar in calendars {
             //print("\(calendar.title) - \(calendar.source.title)");
             
-            if (calendar.title == "David") {
+            if (selectedCalendar != nil && calendar.title == selectedCalendar) {
               
                 let predicate = EventStore.sharedInstance.eventStore.predicateForEvents(withStart: startDate, end: endDate!, calendars: [calendar])
                 let matchingEvents = EventStore.sharedInstance.eventStore.events(matching: predicate)
@@ -275,6 +281,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             &volume)
         let ivol = Int32(round(volume*100.0))
         return ivol
+    }
+    
+    func selectCalendar(title : String) {
+        selectedCalendar = title;
+        UserDefaults.standard.set(selectedCalendar, forKey: kSelectedCalendarKey)
+        loadFirstEvent()
     }
 }
 
