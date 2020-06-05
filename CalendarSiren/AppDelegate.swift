@@ -111,7 +111,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("fireEvent!!")
         guard let event = timer.userInfo as? EKEvent else { return }
         let formatter2 = DateFormatter()
-        formatter2.timeStyle = .medium
+        formatter2.timeStyle = .short
+        formatter2.dateStyle = .medium;
         print("Timer fired on event: \(formatter2.string(from: event.startDate)) \(event.title!)")
         print("new volume: \(macvolume_cmd(set: 1, vol: 100))")
         playSound(file: "siren1", ext: "wav")
@@ -146,13 +147,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func loadFirstEvent() {
-        print("loading calendars")
-        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+        var startDate = Date();
         
         let formatter2 = DateFormatter()
-        formatter2.timeStyle = .medium
+        formatter2.timeStyle = .short
+        formatter2.dateStyle = .medium;
         
-        var startDate = Date();
+        print("loading calendars \(formatter2.string(from: startDate))")
+
+        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+
         if (firstEventDate != nil) {
             startDate =  Calendar.current.date(byAdding: .minute, value: 10, to: firstEventDate!)!
         }
