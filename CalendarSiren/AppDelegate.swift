@@ -26,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let kSelectedCalendarKey = "selectedCalendar"
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        selectedCalendar = UserDefaults.standard.object(forKey:kSelectedCalendarKey) as? String
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarButtonImage"))
             button.action = #selector(togglePopover(_:))
@@ -39,7 +40,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         savedVolume = macvolume_cmd(set:0, vol:100)
         print("saved volume: \(savedVolume)")
         
-        selectedCalendar = UserDefaults.standard.object(forKey:kSelectedCalendarKey) as? String
         
         constructMenu()
 
