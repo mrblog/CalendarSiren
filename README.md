@@ -4,9 +4,9 @@ A little Menu Bar Application to signal persistent alarms for certain events in 
 
 ## Description
 
-I  found myself missing Zoom and Google Hangouts meetings because the normal phone calendar alams are too subtle, especially when the phone is on silent.
+I  found myself missing Zoom and Google Hangouts meetings because the normal phone calendar alarms are too subtle, especially when the phone is on silent.
 
-This simple menubar app makes a lot of noise and keeps making noise until you stop it when it's time ot get ready for a Zoom or Google Hangouts conference call.
+When it's time to get ready for a Zoom or Google Hangouts conference call, this simple menubar app makes a lot of noise and keeps making noise until you stop it.
 
 The app will prompt for permission to access your calendars (it only reads them).
 
