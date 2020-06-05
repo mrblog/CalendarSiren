@@ -50,6 +50,7 @@
 		63CD99D924816D0B00AC4051 /* PopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewController.swift; sourceTree = "<group>"; };
 		63CD99DC2486161D00AC4051 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		63CD99DF248626B000AC4051 /* siren1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = siren1.wav; path = ../../../../Downloads/siren1.wav; sourceTree = "<group>"; };
+		63CD99E12489C82700AC4051 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +81,7 @@
 		633CF3592481560600230EE9 = {
 			isa = PBXGroup;
 			children = (
+				63CD99E12489C82700AC4051 /* README.md */,
 				633CF3642481560600230EE9 /* CalendarSiren */,
 				633CF3752481560700230EE9 /* CalendarSirenTests */,
 				633CF3802481560700230EE9 /* CalendarSirenUITests */,
