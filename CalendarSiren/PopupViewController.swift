@@ -34,7 +34,7 @@ class PopupViewController: NSViewController {
         
         label = NSTextField()
         label!.frame = NSRect(origin: .zero, size: NSSize(width: 200, height: 44))
-        label!.stringValue = "(None))"
+        label!.stringValue = "(None)"
         label!.backgroundColor = .clear
         label!.isBezeled = false
         label!.isEditable = false
@@ -50,13 +50,6 @@ class PopupViewController: NSViewController {
         self.view.addSubview( refreshButton! )
         
         calendarPopup = NSPopUpButton()
-        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
-        for calendar in calendars {
-            calendarPopup?.addItem(withTitle: calendar.title)
-        }
-        if ((NSApp.delegate as! AppDelegate).selectedCalendar != nil) {
-            calendarPopup?.selectItem(withTitle: (NSApp.delegate as! AppDelegate).selectedCalendar!)
-        }
         calendarPopup!.target = self;
         calendarPopup!.action = #selector(calendarChanged(_:))
         self.view.addSubview( calendarPopup! )
@@ -74,6 +67,13 @@ class PopupViewController: NSViewController {
     
     override func viewWillAppear() {
         super.viewWillAppear()
+        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+        for calendar in calendars {
+            calendarPopup?.addItem(withTitle: calendar.title)
+        }
+        if ((NSApp.delegate as! AppDelegate).selectedCalendar != nil) {
+            calendarPopup?.selectItem(withTitle: (NSApp.delegate as! AppDelegate).selectedCalendar!)
+        }
         closeButton!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-50, y: 60, width: 100, height: 30)
         label!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-100, y: 200, width: 200, height: 44)
         refreshButton!.frame = NSRect(x: self.view.frame.origin.x + self.view.frame.size.width/2-50, y: 140, width: 100, height: 30)

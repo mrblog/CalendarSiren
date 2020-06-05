@@ -26,6 +26,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let kSelectedCalendarKey = "selectedCalendar"
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        
+        savedVolume = macvolume_cmd(set:0, vol:100)
+        print("saved volume: \(savedVolume)")
+        
+        EventStore.sharedInstance.requestAccess()
+        
         selectedCalendar = UserDefaults.standard.object(forKey:kSelectedCalendarKey) as? String
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("StatusBarButtonImage"))
@@ -34,17 +40,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let frame = CGRect(origin: .zero, size: CGSize(width: 400, height: 400))
         let viewController = PopupViewController()
         viewController.view.frame = frame
-
+        
         popover.contentViewController = viewController
 
-        savedVolume = macvolume_cmd(set:0, vol:100)
-        print("saved volume: \(savedVolume)")
-        
-        
         constructMenu()
 
-        EventStore.sharedInstance.requestAccess()
-        
         if (selectedCalendar != nil) {
             loadFirstEvent()
         }
