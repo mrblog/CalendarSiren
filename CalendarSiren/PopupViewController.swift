@@ -50,7 +50,7 @@ class PopupViewController: NSViewController {
         self.view.addSubview( refreshButton! )
         
         calendarPopup = NSPopUpButton()
-        calendarPopup!.target = self;
+        calendarPopup!.target = self
         calendarPopup!.action = #selector(calendarChanged(_:))
         self.view.addSubview( calendarPopup! )
 

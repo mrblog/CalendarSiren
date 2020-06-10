@@ -23,6 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var firstEventDate : Date?
     var firstEvent : EKEvent?
     var selectedCalendar : String?
+    var skipToDate : Date?
     let kSelectedCalendarKey = "selectedCalendar"
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -112,7 +113,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let event = timer.userInfo as? EKEvent else { return }
         let formatter2 = DateFormatter()
         formatter2.timeStyle = .short
-        formatter2.dateStyle = .medium;
+        formatter2.dateStyle = .medium
         print("Timer fired on event: \(formatter2.string(from: event.startDate)) \(event.title!)")
         print("new volume: \(macvolume_cmd(set: 1, vol: 100))")
         playSound(file: "siren1", ext: "wav")
@@ -125,7 +126,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer!.prepareToPlay()
-            audioPlayer?.numberOfLoops = -1;
+            audioPlayer?.numberOfLoops = -1
             audioPlayer!.play()
         } catch let error {
             print(error.localizedDescription)
@@ -134,10 +135,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func stopSound() {
         if (audioPlayer != nil) {
-            audioPlayer?.stop();
+            audioPlayer?.stop()
         }
         if (macvolume_cmd(set:0, vol:100) != savedVolume) {
             print("restored volume: \(macvolume_cmd(set: 1, vol: savedVolume))")
+            if (firstEvent != nil) {
+                if (firstEvent!.endDate != nil) {
+                    skipToDate = firstEvent!.endDate
+                } else if (firstEventDate != nil) {
+                    skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
+                }
+            }
             loadFirstEvent()
         }
     }
@@ -147,19 +155,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func loadFirstEvent() {
-        var startDate = Date();
+        var startDate = Date()
         
         let formatter2 = DateFormatter()
         formatter2.timeStyle = .short
-        formatter2.dateStyle = .medium;
+        formatter2.dateStyle = .medium
         
         print("loading calendars \(formatter2.string(from: startDate))")
 
         let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
 
-        if (firstEventDate != nil) {
-            startDate =  Calendar.current.date(byAdding: .minute, value: 10, to: firstEventDate!)!
+        if (skipToDate != nil && startDate < skipToDate!) {
+            startDate = skipToDate!
         }
+       
         let startDateComponents = Calendar.current.dateComponents(
             [ .timeZone,
               .year, .month, .day,
@@ -176,39 +185,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         //let endDate = Calendar.current.date(byAdding: .hour, value: 24, to: startDate)
         
-        firstEventDate = nil;
-        for calendar in calendars {
-            //print("\(calendar.title) - \(calendar.source.title)");
-            
-            if (selectedCalendar != nil && calendar.title == selectedCalendar) {
-              
-                let predicate = EventStore.sharedInstance.eventStore.predicateForEvents(withStart: startDate, end: endDate!, calendars: [calendar])
-                let matchingEvents = EventStore.sharedInstance.eventStore.events(matching: predicate)
+        firstEventDate = nil
+        if (startDate < endDate!) {
+            for calendar in calendars {
+                //print("\(calendar.title) - \(calendar.source.title)")
                 
-                // iterate through events
-                for event in matchingEvents {
-                    if (!event.isAllDay && event.startDate > startDate) {
-                        var notes = "";
-                        if (event.notes != nil) {
-                            notes = event.notes!
-                        }
-                        print("\(formatter2.string(from: event.startDate)) \(event.title!) : \(notes)")
-                        if (notes.contains("meet.google.com") ||
-                            notes.contains("hangouts.google.com") ||
-                            notes.contains("zoom.us")) {
-                            if (firstEventDate == nil || event.startDate < firstEventDate!) {
-                                firstEventDate = Calendar.current.date(byAdding: .minute, value: -10, to: event.startDate)
-                                firstEvent = event
+                if (selectedCalendar != nil && calendar.title == selectedCalendar) {
+                    
+                    let predicate = EventStore.sharedInstance.eventStore.predicateForEvents(withStart: startDate, end: endDate!, calendars: [calendar])
+                    let matchingEvents = EventStore.sharedInstance.eventStore.events(matching: predicate)
+                    
+                    // iterate through events
+                    for event in matchingEvents {
+                        if (!event.isAllDay && event.status != EKEventStatus.canceled &&
+                            event.startDate > startDate) {
+                            var notes = ""
+                            if (event.notes != nil) {
+                                notes = event.notes!
+                            }
+                            print("Checking event: \(formatter2.string(from: event.startDate)) \(event.title!) : \(notes)")
+                            if (notes.contains("meet.google.com") ||
+                                notes.contains("hangouts.google.com") ||
+                                notes.contains("zoom.us") ||
+                                notes.contains("doxy.me")) {
+                                if (firstEventDate == nil || event.startDate < firstEventDate!) {
+                                    firstEventDate = Calendar.current.date(byAdding: .minute, value: -10, to: event.startDate)
+                                    firstEvent = event
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        
+
         if (nextEventTimer != nil) {
             nextEventTimer?.invalidate()
         }
+        print("Time now: \(formatter2.string(from: Date()))")
         if (firstEventDate == nil) {
             print("No events upcoming")
             (popover.contentViewController as! PopupViewController).label!.stringValue = "No events upcoming"
@@ -216,11 +230,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("First event: \(formatter2.string(from: firstEvent!.startDate)) \(firstEvent!.title!)")
             print("Timer: \(formatter2.string(from: firstEventDate!))")
             (popover.contentViewController as! PopupViewController).label!.stringValue = "\(formatter2.string(from: firstEvent!.startDate)) \(firstEvent!.title!)"
-            //let fireDate = Date().addingTimeInterval(5);
+            //let fireDate = Date().addingTimeInterval(5)
             nextEventTimer = Timer(fireAt: firstEventDate!, interval: 0, target: self, selector: #selector(fireEvent), userInfo: firstEvent, repeats: false)
             RunLoop.main.add(nextEventTimer!, forMode: .common)
         }
-    
         var tomorrow = Calendar.current.date(byAdding: .hour, value: 24, to: startDate)
         let tomorrowDateComponents = Calendar.current.dateComponents(
             [ .timeZone,
@@ -291,7 +304,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func selectCalendar(title : String) {
-        selectedCalendar = title;
+        selectedCalendar = title
         UserDefaults.standard.set(selectedCalendar, forKey: kSelectedCalendarKey)
         loadFirstEvent()
     }
