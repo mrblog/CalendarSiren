@@ -12,6 +12,7 @@
 		633CF36B2481560700230EE9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 633CF3692481560700230EE9 /* MainMenu.xib */; };
 		633CF3772481560700230EE9 /* CalendarSirenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633CF3762481560700230EE9 /* CalendarSirenTests.swift */; };
 		633CF3822481560700230EE9 /* CalendarSirenUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633CF3812481560700230EE9 /* CalendarSirenUITests.swift */; };
+		639A441824ADAB38002258AC /* NSSound_SystemVolumeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 639A441724ADAB38002258AC /* NSSound_SystemVolumeExtension.swift */; };
 		63CD99DA24816D0B00AC4051 /* PopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CD99D924816D0B00AC4051 /* PopupViewController.swift */; };
 		63CD99DD2486161D00AC4051 /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63CD99DC2486161D00AC4051 /* EventStore.swift */; };
 		63CD99E0248626B000AC4051 /* siren1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 63CD99DF248626B000AC4051 /* siren1.wav */; };
@@ -47,6 +48,7 @@
 		633CF37D2481560700230EE9 /* CalendarSirenUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalendarSirenUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		633CF3812481560700230EE9 /* CalendarSirenUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSirenUITests.swift; sourceTree = "<group>"; };
 		633CF3832481560700230EE9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		639A441724ADAB38002258AC /* NSSound_SystemVolumeExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSSound_SystemVolumeExtension.swift; sourceTree = "<group>"; };
 		63CD99D924816D0B00AC4051 /* PopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupViewController.swift; sourceTree = "<group>"; };
 		63CD99DC2486161D00AC4051 /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		63CD99DF248626B000AC4051 /* siren1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = siren1.wav; path = ../../../../Downloads/siren1.wav; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 		633CF3642481560600230EE9 /* CalendarSiren */ = {
 			isa = PBXGroup;
 			children = (
+				639A441624ADA999002258AC /* External */,
 				63CD99DE2486269000AC4051 /* Resources */,
 				63CD99DB248615E200AC4051 /* EventStore */,
 				633CF3652481560600230EE9 /* AppDelegate.swift */,
@@ -130,6 +133,14 @@
 				633CF3832481560700230EE9 /* Info.plist */,
 			);
 			path = CalendarSirenUITests;
+			sourceTree = "<group>";
+		};
+		639A441624ADA999002258AC /* External */ = {
+			isa = PBXGroup;
+			children = (
+				639A441724ADAB38002258AC /* NSSound_SystemVolumeExtension.swift */,
+			);
+			path = External;
 			sourceTree = "<group>";
 		};
 		63CD99DB248615E200AC4051 /* EventStore */ = {
@@ -280,6 +291,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				633CF3662481560600230EE9 /* AppDelegate.swift in Sources */,
+				639A441824ADAB38002258AC /* NSSound_SystemVolumeExtension.swift in Sources */,
 				63CD99DA24816D0B00AC4051 /* PopupViewController.swift in Sources */,
 				63CD99DD2486161D00AC4051 /* EventStore.swift in Sources */,
 			);

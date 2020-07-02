@@ -8,7 +8,7 @@
 
 import Cocoa
 import AVFoundation
-import AudioToolbox
+import CoreAudioKit
 import EventKit
 
 @NSApplicationMain
@@ -17,18 +17,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     let popover = NSPopover()
     var audioPlayer : AVAudioPlayer?
-    var savedVolume : Int32 = 0
+    var savedVolume : Float = 0
     var nextEventTimer : Timer?
     var dailyTimer : Timer?
     var firstEventDate : Date?
     var firstEvent : EKEvent?
     var selectedCalendar : String?
+    var stopTimerDate : Date?
+    var stopTimer : Timer?
     var skipToDate : Date?
     let kSelectedCalendarKey = "selectedCalendar"
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         
-        savedVolume = macvolume_cmd(set:0, vol:100)
+        savedVolume = NSSound.systemVolume
         print("saved volume: \(savedVolume)")
         
         EventStore.sharedInstance.requestAccess()
@@ -61,7 +63,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
          */
-        
+        /*
+        NSSound.systemVolume = 1.0
+        print("new volume: \(NSSound.systemVolume)")
+        playSound(file: "siren1", ext: "wav")
+        showPopover(sender: selectedCalendar)
+         */
       
     }
 
@@ -99,15 +106,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         stopSound()
     }
 
-    @objc func fire(_ sender: Any?) {
-        print("FIRE!!!")
-       
-        print("new volume: \(macvolume_cmd(set: 1, vol: 100))")
-        playSound(file: "siren1", ext: "wav")
-        showPopover(sender: sender)
-    }
-    
-    
     @objc func fireEvent(_ timer: Timer ) {
         print("fireEvent!!")
         guard let event = timer.userInfo as? EKEvent else { return }
@@ -115,9 +113,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         formatter2.timeStyle = .short
         formatter2.dateStyle = .medium
         print("Timer fired on event: \(formatter2.string(from: event.startDate)) \(event.title!)")
-        print("new volume: \(macvolume_cmd(set: 1, vol: 100))")
+        if (skipToDate != nil && event.startDate < skipToDate!) {
+            loadFirstEvent()
+            return
+        }
+        if (NSSound.systemVolume < 1.0) {
+            savedVolume = NSSound.systemVolume
+            print("saved volume: \(savedVolume)")
+        }
+        NSSound.systemVolume = 1.0
+        print("new volume: \(NSSound.systemVolume)")
         playSound(file: "siren1", ext: "wav")
         showPopover(sender: timer)
+        stopTimerDate = Calendar.current.date(byAdding: .minute, value: 1, to: event.startDate)
+        print("stopTimerDate: \(formatter2.string(from: stopTimerDate!))")
+        if (stopTimer != nil) {
+            stopTimer?.invalidate()
+        }
+        stopTimer = Timer(fireAt: stopTimerDate!, interval: 0, target: self, selector: #selector(stopSoundAction(_:)), userInfo: nil, repeats: false)
+        RunLoop.main.add(stopTimer!, forMode: .common)
     }
     
     func playSound(file:String, ext:String) -> Void {
@@ -134,24 +148,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func stopSound() {
+        var currentlyPlaying : Bool = true
         if (audioPlayer != nil) {
+            currentlyPlaying = audioPlayer!.isPlaying;
             audioPlayer?.stop()
         }
-        if (macvolume_cmd(set:0, vol:100) != savedVolume) {
-            print("restored volume: \(macvolume_cmd(set: 1, vol: savedVolume))")
-            if (firstEvent != nil) {
-                if (firstEvent!.endDate != nil) {
-                    skipToDate = firstEvent!.endDate
-                } else if (firstEventDate != nil) {
-                    skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
-                }
+        if (currentlyPlaying) {
+            NSSound.systemVolume = savedVolume
+            print("restored volume: \(savedVolume)")
+        }
+        if (firstEvent != nil) {
+            if (firstEvent!.endDate != nil) {
+                skipToDate = firstEvent!.endDate
+            } else if (firstEventDate != nil) {
+                skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
             }
-            loadFirstEvent()
+        }
+        loadFirstEvent()
+        if (stopTimer != nil) {
+            stopTimer?.invalidate()
         }
     }
     
     @objc func dailyRun(_ timer: Timer ) {
         loadFirstEvent()
+    }
+    
+    @objc func stopSoundAction(_ timer: Timer ) {
+        print("stopSoundAction timer fired")
+        stopSound()
     }
     
     func loadFirstEvent() {
@@ -197,7 +222,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     
                     // iterate through events
                     for event in matchingEvents {
-                        if (!event.isAllDay && event.status != EKEventStatus.canceled &&
+                        if (!event.isAllDay && event.hasNotes && event.status != EKEventStatus.canceled &&
                             event.startDate > startDate) {
                             var notes = ""
                             if (event.notes != nil) {
@@ -253,54 +278,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         dailyTimer = Timer(fireAt: tomorrow!, interval: 0, target: self, selector: #selector(dailyRun), userInfo: nil, repeats: false)
         RunLoop.main.add(dailyTimer!, forMode: .common)
         
-    }
-    
-    func macvolume_cmd (set: Int32, vol: Int32) -> Int32
-    {
-        var defaultOutputDeviceID = AudioDeviceID(0)
-        var defaultOutputDeviceIDSize = UInt32(MemoryLayout.size(ofValue:defaultOutputDeviceID))
-        
-        var getDefaultOutputDevicePropertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDefaultOutputDevice),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMaster))
-        
-        AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject),
-            &getDefaultOutputDevicePropertyAddress,
-            0,
-            nil,
-            &defaultOutputDeviceIDSize,
-            &defaultOutputDeviceID)
-        
-        var volume = Float32()
-        var volumeSize = UInt32(MemoryLayout.size(ofValue:volume))
-        
-        var volumePropertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioHardwareServiceDeviceProperty_VirtualMasterVolume),
-            mScope: AudioObjectPropertyScope(kAudioDevicePropertyScopeOutput),
-            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMaster))
-        
-        if (set == 1) {
-            volume = Float(vol) / 100.0
-            AudioHardwareServiceSetPropertyData(
-                defaultOutputDeviceID,
-                &volumePropertyAddress,
-                0,
-                nil,
-                volumeSize,
-                &volume)
-        }
-        
-        AudioHardwareServiceGetPropertyData(
-            defaultOutputDeviceID,
-            &volumePropertyAddress,
-            0,
-            nil,
-            &volumeSize,
-            &volume)
-        let ivol = Int32(round(volume*100.0))
-        return ivol
     }
     
     func selectCalendar(title : String) {
