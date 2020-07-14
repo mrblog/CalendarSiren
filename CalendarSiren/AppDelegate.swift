@@ -148,7 +148,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func stopSound() {
-        var currentlyPlaying : Bool = true
+        var currentlyPlaying : Bool = false
         if (audioPlayer != nil) {
             currentlyPlaying = audioPlayer!.isPlaying;
             audioPlayer?.stop()
@@ -156,17 +156,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if (currentlyPlaying) {
             NSSound.systemVolume = savedVolume
             print("restored volume: \(savedVolume)")
-        }
-        if (firstEvent != nil) {
-            if (firstEvent!.endDate != nil) {
-                skipToDate = firstEvent!.endDate
-            } else if (firstEventDate != nil) {
-                skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
+            
+            if (firstEvent != nil) {
+                if (firstEvent!.endDate != nil) {
+                    skipToDate = firstEvent!.endDate
+                } else if (firstEventDate != nil) {
+                    skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
+                }
             }
-        }
-        loadFirstEvent()
-        if (stopTimer != nil) {
-            stopTimer?.invalidate()
+            loadFirstEvent()
+        
+            if (stopTimer != nil) {
+                stopTimer?.invalidate()
+            }
         }
     }
     
@@ -224,6 +226,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     for event in matchingEvents {
                         if (!event.isAllDay && event.hasNotes && event.status != EKEventStatus.canceled &&
                             event.startDate > startDate) {
+                            var accepted: Bool = true
+                            if (event.hasAttendees) {
+                                for attendee in event.attendees! {
+                                    print("attendee: \(attendee.name ?? "??")")
+                                    if (attendee.isCurrentUser) {
+                                        accepted = (attendee.participantStatus == EKParticipantStatus.accepted)
+                                    }
+                                }
+                            }
+                            if (!accepted) {
+                                print("status: not-accepted")
+                                continue
+                            }
                             var notes = ""
                             if (event.notes != nil) {
                                 notes = event.notes!
@@ -290,5 +305,70 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         debugPrint("storeChanged \(notification)")
         loadFirstEvent()
     }
-}
 
+
+    func loadTestEvents() {
+
+        let startDate = Calendar.current.date(byAdding: .hour, value: -4, to: Date())!
+
+        let formatter2 = DateFormatter()
+        formatter2.timeStyle = .short
+        formatter2.dateStyle = .medium
+        
+        print("loading calendars \(formatter2.string(from: startDate))")
+        
+        let calendars = EventStore.sharedInstance.eventStore.calendars(for: .event)
+        
+        let startDateComponents = Calendar.current.dateComponents(
+            [ .timeZone,
+              .year, .month, .day,
+              .hour, .minute, .second],
+            from: startDate)
+        
+        let endDateComponents = DateComponents(calendar: Calendar.current,
+                                               timeZone: startDateComponents.timeZone, year: startDateComponents.year,
+                                               month: startDateComponents.month,
+                                               day: startDateComponents.day,
+                                               hour: 19)
+        let endDate = Calendar.current.date(from: endDateComponents)
+        print("End date: \(formatter2.string(from: endDate!))")
+        
+        //let endDate = Calendar.current.date(byAdding: .hour, value: 24, to: startDate)
+        
+        if (startDate < endDate!) {
+            for calendar in calendars {
+                //print("\(calendar.title) - \(calendar.source.title)")
+                
+                if (selectedCalendar != nil && calendar.title == selectedCalendar) {
+                    
+                    let predicate = EventStore.sharedInstance.eventStore.predicateForEvents(withStart: startDate, end: endDate!, calendars: [calendar])
+                    let matchingEvents = EventStore.sharedInstance.eventStore.events(matching: predicate)
+                    
+                    // iterate through events
+                    for event in matchingEvents {
+                        if (!event.isAllDay && event.hasNotes && event.status != EKEventStatus.canceled &&
+                            event.startDate > startDate) {
+                            var notes = ""
+                            if (event.notes != nil) {
+                                notes = event.notes!
+                            }
+                            print("Checking event: \(formatter2.string(from: event.startDate)) \(event.title!) : \(notes)")
+                            if (event.title.contains("Family")) {
+                                if (event.hasAttendees) {
+                                    for attendee in event.attendees! {
+                                        print("attendee: \(attendee.name ?? "??")")
+                                        if (attendee.isCurrentUser) {
+                                            if (attendee.participantStatus == EKParticipantStatus.accepted) {
+                                                print("status: accepted");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
