@@ -114,7 +114,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         formatter2.dateStyle = .medium
         print("Timer fired on event: \(formatter2.string(from: event.startDate)) \(event.title!)")
         if (skipToDate != nil && event.startDate < skipToDate!) {
-            loadFirstEvent()
+            DispatchQueue.main.async {
+                self.loadFirstEvent()
+            }
             return
         }
         if (NSSound.systemVolume < 1.0) {
@@ -164,7 +166,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     skipToDate = Calendar.current.date(byAdding: .minute, value: 12, to: firstEventDate!)!
                 }
             }
-            loadFirstEvent()
+            DispatchQueue.main.async {
+                self.loadFirstEvent()
+            }
         
             if (stopTimer != nil) {
                 stopTimer?.invalidate()
@@ -173,7 +177,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func dailyRun(_ timer: Timer ) {
-        loadFirstEvent()
+        DispatchQueue.main.async {
+            self.loadFirstEvent()
+        }
     }
     
     @objc func stopSoundAction(_ timer: Timer ) {
@@ -298,12 +304,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func selectCalendar(title : String) {
         selectedCalendar = title
         UserDefaults.standard.set(selectedCalendar, forKey: kSelectedCalendarKey)
-        loadFirstEvent()
+        DispatchQueue.main.async {
+            self.loadFirstEvent()
+        }
     }
     
     @objc private func storeChanged(notification: NSNotification) {
         debugPrint("storeChanged \(notification)")
-        loadFirstEvent()
+        DispatchQueue.main.async {
+            self.loadFirstEvent()
+        }
     }
 
 

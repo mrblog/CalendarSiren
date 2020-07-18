@@ -227,13 +227,16 @@
 				TargetAttributes = {
 					633CF3612481560600230EE9 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1160;
 					};
 					633CF3712481560700230EE9 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1160;
 						TestTargetID = 633CF3612481560600230EE9;
 					};
 					633CF37C2481560700230EE9 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1160;
 						TestTargetID = 633CF3612481560600230EE9;
 					};
 				};
@@ -471,7 +474,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSiren;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -491,7 +494,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSiren;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -511,7 +514,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSirenTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CalendarSiren.app/Contents/MacOS/CalendarSiren";
 			};
 			name = Debug;
@@ -532,7 +535,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSirenTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CalendarSiren.app/Contents/MacOS/CalendarSiren";
 			};
 			name = Release;
@@ -552,7 +555,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSirenUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = CalendarSiren;
 			};
 			name = Debug;
@@ -572,7 +575,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.bdt.CalendarSirenUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = CalendarSiren;
 			};
 			name = Release;
